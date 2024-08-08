@@ -41,19 +41,8 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success('Your Smoothie is ordered!', icon="✅")
 
-        # Make the API call
 fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
-
-# Check if the request was successful
-if fruityvice_response.status_code == 200:
-    
-    # Convert JSON data to a Pandas DataFrame
-    fv_df = pd.DataFrame(response_data)
-    
-    # Display the DataFrame
-    st.write("Fruityvice DataFrame:", fv_df)
-else:
-    st.error(f"API request failed with status code {fruityvice_response.status_code}")
+st.text(fruityvice_response)
     st.stop()
 
 
