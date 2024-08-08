@@ -37,28 +37,30 @@ if ingredients_list:
     INSERT INTO smoothies.public.orders (ingredients, NAME_ON_ORDER)
     VALUES ('{ingredients_string}', '{name_on_order}')
     """
-    
+
     # Display SQL insert statement
     st.write(my_insert_stmt)
-     # Fetch data for the selected fruits from the Fruityvice API
+
+    # Fetch data for the selected fruits from the Fruityvice API
     for fruit in ingredients_list:
-            # Make API call for each selected fruit
-        st.subheader(fruit + 'Nutrition Information')
-        fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{fruit.lower()}")
-            
-            # Check if the request was successful
+        # Format fruit name for API request (handle spaces and case)
+        formatted_fruit_name = fruit.lower().replace(" ", "-")
+        
+        st.subheader(f"{fruit} Nutrition Information")
+        fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{formatted_fruit_name}")
+        
+        # Check if the request was successful
         if fruityvice_response.status_code == 200:
-                # Parse JSON data from the response
+            # Parse JSON data from the response
             response_data = fruityvice_response.json()
-                
-                # Convert JSON data to a Pandas DataFrame
+            
+            # Convert JSON data to a Pandas DataFrame
             fv_df = pd.DataFrame([response_data])
-                
-                # Display the DataFrame
+            
+            # Display the DataFrame
             st.write(f"Fruityvice DataFrame for {fruit}:", fv_df)
         else:
             st.error(f"API request for {fruit} failed with status code {fruityvice_response.status_code}")
-        
 
     # Button to submit the order
     time_to_insert = st.button("Submit Order")
