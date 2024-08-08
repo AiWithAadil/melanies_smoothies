@@ -1,3 +1,4 @@
+import requests
 import streamlit as st
 from snowflake.snowpark.functions import col, when_matched
 
@@ -9,7 +10,6 @@ name_on_order = st.text_input("Name on Smoothie:")
 st.write("The name on your Smoothie will be:", name_on_order)
 
 cnx = st.connection("snowflake")
-
 session = cnx.session()
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
 
@@ -21,8 +21,8 @@ editable_df = st.experimental_data_editor(my_dataframe_pd)
 
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
-    my_dataframe_pd['FRUIT_NAME'].tolist()
-    , max_selections = 5
+    my_dataframe_pd['FRUIT_NAME'].tolist(),
+    max_selections = 5
 )
 
 if ingredients_list:
@@ -39,9 +39,11 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
         st.success('Your Smoothie is ordered!', icon="✅")
-        import requests
+
+        # Call the Fruityvice API and display the response
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
-        st.text(fruityvice_response)
+        response_data = fruityvice_response.json()  # Parse JSON response
+        st.write(response_data)  # Display the JSON content
     st.stop()
 
 
