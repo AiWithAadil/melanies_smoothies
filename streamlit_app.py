@@ -18,7 +18,7 @@ st.write("Choose the fruits you want in your custom Smoothie!")
 # Allow user to input name on order
 name_on_order = st.text_input("Name on Smoothie:")
 st.write("The name on your Smoothie will be:", name_on_order)
-
+st.write(pd_df)
 # Allow user to select ingredients
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
