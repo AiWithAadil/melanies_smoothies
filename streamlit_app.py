@@ -30,7 +30,6 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
-    # Prepare search terms for API calls
     for fruit in ingredients_list:
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit, 'SEARCH_ON'].iloc[0]
         fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{search_on.lower()}")
@@ -48,6 +47,8 @@ if ingredients_list:
                 st.write(f"Fruityvice DataFrame for {fruit}:", fv_df)
             else:
                 st.error(f"Unexpected data format for {fruit}: {response_data}")
+        elif fruityvice_response.status_code == 404:
+            st.warning(f"No data available for {fruit}.")
         else:
             st.error(f"API request for {fruit} failed with status code {fruityvice_response.status_code}")
 
