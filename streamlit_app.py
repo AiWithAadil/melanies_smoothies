@@ -13,21 +13,15 @@ my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT
 pd_df = my_dataframe.to_pandas()
 name_on_order = st.text_input("Name on Smoothie:")
 # Connect to Snowflake and fetch fruit options
-try:
-    cnx = st.connection("snowflake")
-    session = cnx.session()
-    my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
+cnx = st.connection("snowflake")
+session = cnx.session()
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
 
-    # Convert Snowpark DataFrame to Pandas DataFrame
-    pd_df = my_dataframe.to_pandas()
-except Exception as e:
-    st.error(f"Error fetching data from Snowflake: {e}")
-    st.stop()
 
 # Allow user to select ingredients
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
-    pd_df['FRUIT_NAME'].tolist(),
+    pd_df,
     max_selections=5
 )
 
