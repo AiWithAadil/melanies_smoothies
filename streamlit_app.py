@@ -13,41 +13,26 @@ st.write("The name on your Smoothie will be:", name_on_order)
 # Connect to Snowflake and fetch fruit options
 cnx = st.connection("snowflake")
 session = cnx.session()
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
 
 # Convert Snowpark DataFrame to Pandas DataFrame
-my_dataframe_pd = my_dataframe.to_pandas()
+pd_df = my_dataframe.to_pandas()
 
 # Use st.experimental_data_editor with Pandas DataFrame
-editable_df = st.experimental_data_editor(my_dataframe_pd)
+editable_df = st.experimental_data_editor(pd_df)
 
 # Allow user to select ingredients
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
-    my_dataframe_pd['FRUIT_NAME'].tolist(),
+    pd_df['FRUIT_NAME'].tolist(),
     max_selections=5
 )
 
 if ingredients_list:
-    # Join selected ingredients into a string for the SQL insert statement
-    ingredients_string = ' '.join(ingredients_list)
-
-    # Create SQL insert statement
-    my_insert_stmt = f"""
-    INSERT INTO smoothies.public.orders (ingredients, NAME_ON_ORDER)
-    VALUES ('{ingredients_string}', '{name_on_order}')
-    """
-
-    # Display SQL insert statement
-    st.write(my_insert_stmt)
-
-    # Fetch data for the selected fruits from the Fruityvice API
+    # Prepare search terms for API calls
     for fruit in ingredients_list:
-        # Format fruit name for API request (handle spaces and case)
-        formatted_fruit_name = fruit.lower().replace(" ", "-")
-        
-        st.subheader(f"{fruit} Nutrition Information")
-        fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{formatted_fruit_name}")
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit, 'SEARCH_ON'].iloc[0]
+        fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{search_on.lower()}")
         
         # Check if the request was successful
         if fruityvice_response.status_code == 200:
@@ -62,6 +47,16 @@ if ingredients_list:
         else:
             st.error(f"API request for {fruit} failed with status code {fruityvice_response.status_code}")
 
+    # Create SQL insert statement
+    ingredients_string = ' '.join(ingredients_list)
+    my_insert_stmt = f"""
+    INSERT INTO smoothies.public.orders (ingredients, NAME_ON_ORDER)
+    VALUES ('{ingredients_string}', '{name_on_order}')
+    """
+    
+    # Display SQL insert statement
+    st.write(my_insert_stmt)
+    
     # Button to submit the order
     time_to_insert = st.button("Submit Order")
 
