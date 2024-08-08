@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 from snowflake.snowpark.functions import col
-
+import request
 # Write directly to the app
 st.title(":cup_with_straw: Customize Your Smoothie :cup_with_straw:")
 st.write("Choose the fruits you want in your custom Smoothie!")
@@ -25,10 +25,11 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
-    # Prepare search terms for API calls and create SQL insert statement
-    ingredients_string = ' '.join(ingredients_list)
-    is_filled = st.checkbox("Mark as Filled")
-    order_filled = 'TRUE' if is_filled else 'FALSE'
+    ingredients_string = ''
+   for fruit_chosen in ingredients_list:
+       ingredients_string += fruit_chosen + ' '
+       fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
+       fv_df = st.dataframe(data=fruityvice_response.json(), use_container_with=True)
     
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, NAME_ON_ORDER, ORDER_FILLED)
