@@ -1,4 +1,5 @@
 import requests
+import pandas as pd
 import streamlit as st
 from snowflake.snowpark.functions import col, when_matched
 
@@ -40,10 +41,24 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success('Your Smoothie is ordered!', icon="✅")
 
-        # Call the Fruityvice API and display the response
-        fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
-        response_data = fruityvice_response.json()  # Parse JSON response
-        st.write(response_data)  # Display the JSON content
+        # Make the API call
+fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
+
+# Check if the request was successful
+if fruityvice_response.status_code == 200:
+    # Parse JSON data from the response
+    response_data = fruityvice_response.json()
+    
+    # Display raw JSON data
+    st.write("API Response (JSON):", response_data)
+    
+    # Convert JSON data to a Pandas DataFrame
+    fv_df = pd.DataFrame(response_data)
+    
+    # Display the DataFrame
+    st.write("Fruityvice DataFrame:", fv_df)
+else:
+    st.error(f"API request failed with status code {fruityvice_response.status_code}")
     st.stop()
 
 
