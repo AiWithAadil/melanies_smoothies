@@ -46,11 +46,6 @@ fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon"
 
 # Check if the request was successful
 if fruityvice_response.status_code == 200:
-    # Parse JSON data from the response
-    response_data = fruityvice_response.json()
-    
-    # Display raw JSON data
-    st.write("API Response (JSON):", response_data)
     
     # Convert JSON data to a Pandas DataFrame
     fv_df = pd.DataFrame(response_data)
