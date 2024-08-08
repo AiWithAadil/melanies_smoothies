@@ -11,7 +11,6 @@ name_on_order = st.text_input("Name on Smoothie:")
 st.write("The name on your Smoothie will be:", name_on_order)
 
 # Connect to Snowflake and fetch fruit options
-# Ensure Snowflake connection details are correctly configured in the Streamlit configuration
 cnx = st.connection("snowflake")
 session = cnx.session()
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
@@ -30,6 +29,7 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
+    successful_fruits = []
     for fruit in ingredients_list:
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit, 'SEARCH_ON'].iloc[0]
         st.write(f'The search value for {fruit} is {search_on}.')
@@ -47,6 +47,7 @@ if ingredients_list:
                 
                 # Display the DataFrame
                 st.write(f"Fruityvice DataFrame for {fruit}:", fv_df)
+                successful_fruits.append(fruit)  # Track successful fruits
             else:
                 st.error(f"Unexpected data format for {fruit}: {response_data}")
         elif fruityvice_response.status_code == 404:
@@ -55,24 +56,27 @@ if ingredients_list:
             st.error(f"API request for {fruit} failed with status code {fruityvice_response.status_code}")
 
     # Create SQL insert statement
-    ingredients_string = ' '.join(ingredients_list)
-    my_insert_stmt = f"""
-    INSERT INTO smoothies.public.orders (ingredients, NAME_ON_ORDER)
-    VALUES ('{ingredients_string}', '{name_on_order}')
-    """
-    
-    # Display SQL insert statement
-    st.write("Generated SQL Insert Statement:")
-    st.code(my_insert_stmt, language='sql')
-    
-    # Button to submit the order
-    if st.button("Submit Order"):
-        try:
-            # Execute the SQL insert statement
-            session.sql(my_insert_stmt).collect()
-            st.success('Your Smoothie is ordered!', icon="✅")
-        except Exception as e:
-            st.error(f"An error occurred while submitting the order: {e}")
+    if successful_fruits:
+        ingredients_string = ' '.join(successful_fruits)
+        my_insert_stmt = f"""
+        INSERT INTO smoothies.public.orders (ingredients, NAME_ON_ORDER)
+        VALUES ('{ingredients_string}', '{name_on_order}')
+        """
         
-        # Stop the Streamlit script execution
-        st.stop()
+        # Display SQL insert statement
+        st.write("Generated SQL Insert Statement:")
+        st.code(my_insert_stmt, language='sql')
+        
+        # Button to submit the order
+        if st.button("Submit Order"):
+            try:
+                # Execute the SQL insert statement
+                session.sql(my_insert_stmt).collect()
+                st.success('Your Smoothie is ordered!', icon="✅")
+            except Exception as e:
+                st.error(f"An error occurred while submitting the order: {e}")
+            
+            # Stop the Streamlit script execution
+            st.stop()
+    else:
+        st.warning("No valid fruits selected for the order.")
