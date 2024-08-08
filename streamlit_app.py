@@ -43,6 +43,7 @@ if ingredients_list:
      # Fetch data for the selected fruits from the Fruityvice API
     for fruit in ingredients_list:
             # Make API call for each selected fruit
+        st.subheader(fruit + 'Nutrition Information')
         fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{fruit.lower()}")
             
             # Check if the request was successful
