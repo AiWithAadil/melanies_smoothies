@@ -33,6 +33,20 @@ if ingredients_list:
     INSERT INTO smoothies.public.orders (ingredients, NAME_ON_ORDER)
     VALUES ('{ingredients_string}', '{name_on_order}')
     """
+    fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
+
+# Check if the request was successful
+    if fruityvice_response.status_code == 200:
+    # Parse JSON data from the response
+        response_data = fruityvice_response.json()
+    
+    # Convert JSON data to a Pandas DataFrame
+        fv_df = pd.DataFrame(response_data)
+    
+    # Display the DataFrame
+        st.write("Fruityvice DataFrame:", fv_df)
+    else:
+        st.error(f"API request failed with status code {fruityvice_response.status_code}")
 
     st.write(my_insert_stmt)
     time_to_insert = st.button("Submit Order")
@@ -41,21 +55,7 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success('Your Smoothie is ordered!', icon="✅")
 
-# Make the API call
-fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
-
-# Check if the request was successful
-if fruityvice_response.status_code == 200:
-    # Parse JSON data from the response
-    response_data = fruityvice_response.json()
-    
-    # Convert JSON data to a Pandas DataFrame
-    fv_df = pd.DataFrame(response_data)
-    
-    # Display the DataFrame
-    st.write("Fruityvice DataFrame:", fv_df)
-else:
-    st.error(f"API request failed with status code {fruityvice_response.status_code}")
+# Make the API cal
     st.stop()
 
 
