@@ -40,16 +40,20 @@ if ingredients_list:
         search_term = pd_df[pd_df['FRUIT_NAME'] == fruit_chosen]['SEARCH_ON'].values[0]
 
         try:
-            fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{search_term}")
-            fruityvice_response.raise_for_status()  # Check for request errors
-            fruityvice_data = fruityvice_response.json()
+            # Test with known valid fruits for API
+            if search_term in ["apple", "banana", "orange"]:
+                fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{search_term}")
+                fruityvice_response.raise_for_status()  # Check for request errors
+                fruityvice_data = fruityvice_response.json()
 
-            # Convert JSON response to DataFrame for display
-            if fruityvice_data:
-                fv_df = pd.json_normalize(fruityvice_data)
-                st.dataframe(fv_df, use_container_width=True)
+                # Convert JSON response to DataFrame for display
+                if fruityvice_data:
+                    fv_df = pd.json_normalize(fruityvice_data)
+                    st.dataframe(fv_df, use_container_width=True)
+                else:
+                    st.warning(f"No nutritional information available for {fruit_chosen}.")
             else:
-                st.warning(f"No nutritional information available for {fruit_chosen}.")
+                st.warning(f"{search_term} is not available in the Fruityvice API.")
         except requests.RequestException as req_e:
             st.error(f"Error fetching nutritional information: {req_e}")
 
