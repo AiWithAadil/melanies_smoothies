@@ -40,6 +40,24 @@ if ingredients_list:
     
     # Display SQL insert statement
     st.write(my_insert_stmt)
+     # Fetch data for the selected fruits from the Fruityvice API
+    for fruit in ingredients_list:
+            # Make API call for each selected fruit
+        fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{fruit.lower()}")
+            
+            # Check if the request was successful
+        if fruityvice_response.status_code == 200:
+                # Parse JSON data from the response
+            response_data = fruityvice_response.json()
+                
+                # Convert JSON data to a Pandas DataFrame
+            fv_df = pd.DataFrame([response_data])
+                
+                # Display the DataFrame
+            st.write(f"Fruityvice DataFrame for {fruit}:", fv_df)
+        else:
+            st.error(f"API request for {fruit} failed with status code {fruityvice_response.status_code}")
+        
 
     # Button to submit the order
     time_to_insert = st.button("Submit Order")
@@ -48,24 +66,6 @@ if ingredients_list:
         # Execute the SQL insert statement
         session.sql(my_insert_stmt).collect()
         st.success('Your Smoothie is ordered!', icon="✅")
-        
-        # Fetch data for the selected fruits from the Fruityvice API
-        for fruit in ingredients_list:
-            # Make API call for each selected fruit
-            fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{fruit.lower()}")
-            
-            # Check if the request was successful
-            if fruityvice_response.status_code == 200:
-                # Parse JSON data from the response
-                response_data = fruityvice_response.json()
-                
-                # Convert JSON data to a Pandas DataFrame
-                fv_df = pd.DataFrame([response_data])
-                
-                # Display the DataFrame
-                st.write(f"Fruityvice DataFrame for {fruit}:", fv_df)
-            else:
-                st.error(f"API request for {fruit} failed with status code {fruityvice_response.status_code}")
         
         # Stop the Streamlit script execution
         st.stop()
