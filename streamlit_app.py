@@ -11,6 +11,7 @@ name_on_order = st.text_input("Name on Smoothie:")
 st.write("The name on your Smoothie will be:", name_on_order)
 
 # Connect to Snowflake and fetch fruit options
+# Ensure Snowflake connection details are correctly configured in the Streamlit configuration
 cnx = st.connection("snowflake")
 session = cnx.session()
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
@@ -39,11 +40,14 @@ if ingredients_list:
             # Parse JSON data from the response
             response_data = fruityvice_response.json()
             
-            # Convert JSON data to a Pandas DataFrame
-            fv_df = pd.DataFrame([response_data])
-            
-            # Display the DataFrame
-            st.write(f"Fruityvice DataFrame for {fruit}:", fv_df)
+            if isinstance(response_data, dict):  # Ensure the response is a dictionary
+                # Convert JSON data to a Pandas DataFrame
+                fv_df = pd.DataFrame([response_data])
+                
+                # Display the DataFrame
+                st.write(f"Fruityvice DataFrame for {fruit}:", fv_df)
+            else:
+                st.error(f"Unexpected data format for {fruit}: {response_data}")
         else:
             st.error(f"API request for {fruit} failed with status code {fruityvice_response.status_code}")
 
@@ -55,15 +59,17 @@ if ingredients_list:
     """
     
     # Display SQL insert statement
-    st.write(my_insert_stmt)
+    st.write("Generated SQL Insert Statement:")
+    st.code(my_insert_stmt, language='sql')
     
     # Button to submit the order
-    time_to_insert = st.button("Submit Order")
-
-    if time_to_insert:
-        # Execute the SQL insert statement
-        session.sql(my_insert_stmt).collect()
-        st.success('Your Smoothie is ordered!', icon="✅")
+    if st.button("Submit Order"):
+        try:
+            # Execute the SQL insert statement
+            session.sql(my_insert_stmt).collect()
+            st.success('Your Smoothie is ordered!', icon="✅")
+        except Exception as e:
+            st.error(f"An error occurred while submitting the order: {e}")
         
         # Stop the Streamlit script execution
         st.stop()
