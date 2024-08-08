@@ -32,6 +32,8 @@ ingredients_list = st.multiselect(
 if ingredients_list:
     for fruit in ingredients_list:
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit, 'SEARCH_ON'].iloc[0]
+        st.write(f'The search value for {fruit} is {search_on}.')
+
         fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{search_on.lower()}")
         
         # Check if the request was successful
