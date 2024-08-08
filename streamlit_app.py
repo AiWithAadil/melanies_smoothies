@@ -28,17 +28,14 @@ if ingredients_list:
     ingredients_string = ''
    for fruit_chosen in ingredients_list:
        ingredients_string += fruit_chosen + ' '
-       fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
+       st.subheader(fruit_chosen + 'Nutrition Information')
+       fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon" + fruit_chosen)
        fv_df = st.dataframe(data=fruityvice_response.json(), use_container_with=True)
     
     my_insert_stmt = f"""
     INSERT INTO smoothies.public.orders (ingredients, NAME_ON_ORDER, ORDER_FILLED)
     VALUES ('{ingredients_string}', '{name_on_order}', {order_filled})
     """
-    
-    # Display SQL insert statement
-    st.write("Generated SQL Insert Statement:")
-    st.code(my_insert_stmt, language='sql')
     
     # Button to submit the order
     if st.button("Submit Order"):
