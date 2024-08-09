@@ -50,10 +50,8 @@ if ingredient_list:
     #st.write(ingredients_string)
 
     # Build a SQL Insert Statement & Test It
-    my_insert_stmt = f"""
-        INSERT INTO smoothies.public.orders (ingredients, name_on_order)
-        VALUES (%s, %s)
-     """
+    my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
+                values ('""" + ingredients_string + """', '"""+name_on_order+"""')"""
     
     #st.write(my_insert_stmt)
     #st.stop
